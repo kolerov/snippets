@@ -1,5 +1,7 @@
 # Buildroot Bundle for HS Development Kit
 
+## Building
+
 This is content of `build` directory inside of Buildroot directory.
 
 ```shell
@@ -42,6 +44,36 @@ Copy client side keys:
 ```shell
 cp keys/* ~/.ssh/keys/
 ```
+
+## Generating Keys
+
+Overlay already contains pregenerated client side keys. You can generate your own keys:
+
+```
+$ mkdir -p ~/.ssh/keys
+$ ssh-keygen -t rsa -C "hsdk@hsdk"
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/user/.ssh/id_rsa): /home/user/.ssh/keys/hsdk
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/user/.ssh/keys/hsdk
+Your public key has been saved in /home/user/.ssh/keys/hsdk.pub
+```
+
+Add your public key to the overlay directory for `hsdk` user:
+
+```shell
+mkdir -p overlay/hsdk/.ssh
+cp -f ~/.ssh/keys/hsdk.pub overlay/hsdk/.ssh/authorized_keys
+```
+
+Overlay already contains pregenerated host keys. However, you can generate your own keys:
+
+```shell
+ssh-keygen -A -f overlay
+```
+
+## Connecting
 
 Now you can connect to the board this way:
 
