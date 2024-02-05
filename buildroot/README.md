@@ -1,22 +1,21 @@
-# Buildroot Bundle for HS Development Kit
+# Buildroot for QEMU and HS Development Kit
 
-## Building
-
-This is content of `build` directory inside of Buildroot directory.
+## Environment
 
 ```shell
-git clone https://git.busybox.net/buildroot
-cp -r path/to/hsdk buildroot/build
-cd buildroot/build
-make -C .. O=$(pwd) defconfig DEFCONFIG=build/defconfig
-make -j 1
+git clone https://git.buildroot.net/buildroot buildroot
+git clone -b arc64 https://github.com/foss-for-synopsys-dwc-arc-processors/buildroot buildroot-synopsys
 ```
+
+## Writing an Image to micro-SD Card
 
 Write `sdcard.img` to micro-SD card using `dd`:
 
 ```shell
 sudo dd if=sdcard.img of=/dev/mmcblk0 bs=1M
 ```
+
+## Building `vmlinux` instead of `uImage` for HS Development Kit
 
 Set these options to build `vmlinux` instead of `uImage`:
 
@@ -35,8 +34,8 @@ to it through SSH:
 Host hsdk
     HostName            192.168.1.142
     Port                22
-    User                hsdk
-    IdentityFile        ~/.ssh/keys/hsdk
+    User                root
+    IdentityFile        ~/.ssh/keys/arc
 ```
 
 Copy client side keys:
@@ -51,20 +50,21 @@ Overlay already contains pregenerated client side keys. You can generate your ow
 
 ```
 $ mkdir -p ~/.ssh/keys
-$ ssh-keygen -t rsa -C "hsdk@hsdk"
+$ ssh-keygen -t rsa -C "arc@arc"
 Generating public/private rsa key pair.
-Enter file in which to save the key (/home/user/.ssh/id_rsa): /home/user/.ssh/keys/hsdk
+Enter file in which to save the key (/home/user/.ssh/id_rsa): /home/user/.ssh/keys/arc
 Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
-Your identification has been saved in /home/user/.ssh/keys/hsdk
-Your public key has been saved in /home/user/.ssh/keys/hsdk.pub
+Your identification has been saved in /home/user/.ssh/keys/arc
+Your public key has been saved in /home/user/.ssh/keys/arc.pub
 ```
 
-Add your public key to the overlay directory for `hsdk` user:
+Add your public key to the overlay directory for all users:
 
 ```shell
 mkdir -p overlay/hsdk/.ssh
-cp -f ~/.ssh/keys/hsdk.pub overlay/hsdk/.ssh/authorized_keys
+cp -f ~/.ssh/keys/arc.pub common/overlay/root/.ssh/authorized_keys
+cp -f ~/.ssh/keys/arc.pub common/overlay/home/user/.ssh/authorized_keys
 ```
 
 Overlay already contains pregenerated host keys. However, you can generate your own keys:
@@ -73,9 +73,9 @@ Overlay already contains pregenerated host keys. However, you can generate your 
 ssh-keygen -A -f overlay
 ```
 
-## Connecting
+## Connecting to HS Development Kit
 
 Now you can connect to the board this way:
 
 1. Serial: `minicom -8 -b 115200 -D /dev/ttyUSB0 -s` (disable hardware flow control)
-2. SSH: `ssh hsdk@hsdk`
+2. SSH: `ssh arc-hsdk-root`
