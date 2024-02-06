@@ -16,6 +16,40 @@ QEMU_COMMON_ARGS := \
 RSYNC_ARGS := -rpltv --chmod=a+wr
 
 #
+# Repositories
+#
+
+define clone_git_repository
+	mkdir -p $(1)
+	cd $(1)
+	git -C $(1) init
+	git -C $(1) remote remove origin || true
+	git -C $(1) remote add origin $(2)
+	git -C $(1) fetch --all -p
+	git -C $(1) checkout $(3)
+	git -C $(1) branch --set-upstream-to=origin/$(3) $(3)
+	git -C $(1) pull
+endef
+
+clone-buildroot-upstream:
+	$(call clone_git_repository,buildroot,https://git.buildroot.net/buildroot,master)
+
+clone-buildroot-synopsys:
+	$(call clone_git_repository,buildroot-synopsys,https://github.com/foss-for-synopsys-dwc-arc-processors/buildroot,arc64)
+
+clone-buildroot: clone-buildroot-upstream clone-buildroot-synopsys
+
+update-buildroot-upstream:
+	git -C buildroot fetch --all -p
+	git -C buildroot pull
+
+update-buildroot-synopsys:
+	git -C buildroot-synopsys fetch --all -p
+	git -C buildroot-synopsys pull
+
+update-buildroot: update-buildroot-upstream update-buildroot-synopsys
+
+#
 # QEMU HS4x
 #
 
@@ -30,14 +64,6 @@ configure-qemu-hs4x:
 
 build-qemu-hs4x:
 	make -C build-qemu-hs4x-gnu -j $(NPROC)
-
-setup-gdb-hs4x:
-	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc-linux-gnu-native/* root@$(REMOTE_HOST):/
-
-setup-bugs-hs4x:
-	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) $(BUGS_DIR)/* root@$(REMOTE_HOST):/root/
-
-setup-hs4x: setup-gdb-hs4x setup-bugs-hs4x
 
 #
 # QEMU HS5x
@@ -74,3 +100,23 @@ configure-qemu-hs6x:
 
 build-qemu-hs6x:
 	make -C build-qemu-hs6x-gnu -j $(NPROC)
+
+#
+# Setup
+#
+
+setup-gdb-hs4x:
+	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc-linux-gnu-native/* root@$(REMOTE_HOST):/
+
+setup-gdb-hs5x:
+	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc32-linux-uclibc-native/* root@$(REMOTE_HOST):/
+
+setup-gdb-hs6x:
+	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc64-linux-gnu-native/* root@$(REMOTE_HOST):/
+
+setup-bugs:
+	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) $(BUGS_DIR)/* root@$(REMOTE_HOST):/root/
+
+setup-hs4x: setup-gdb-hs4x setup-bugs
+setup-hs5x: setup-gdb-hs5x setup-bugs
+setup-hs6x: setup-gdb-hs6x setup-bugs
