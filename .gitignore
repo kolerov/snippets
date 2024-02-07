@@ -1,2 +1,5 @@
 arc/gdb/binutils-gdb/
 arc/gdb/build-*
+arc/dejagnu/**/log
+arc/dejagnu/**/tmp
+arc/dejagnu/**/obj
