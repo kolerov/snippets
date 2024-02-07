@@ -1,0 +1,2 @@
+#%Module
+module-version bpftool/7.3.0 default

@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {GCC toolchain for ARCv1/ARCv2 targets}
+    puts stderr {}
+}
+
+module-whatis {GCC toolchain for ARCv1/ARCv2 targets}
+
+prepend-path PATH /tools/gcc-arc-elf-2020.09/bin

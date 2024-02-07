@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {GCC toolchain for ARC HS4x GNU Linux targets}
+    puts stderr {}
+}
+
+module-whatis {GCC toolchain for ARC HS4x GNU Linux targets}
+
+prepend-path PATH /tools/gcc-arc-linux-gnu-2023.09-hs4x/bin

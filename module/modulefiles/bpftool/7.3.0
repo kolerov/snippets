@@ -1,0 +1,12 @@
+#%Module
+
+prereq elfutils/0.189
+
+proc ModulesHelp {} {
+    puts stderr {bpftool tool}
+    puts stderr {}
+}
+
+module-whatis {bpftool tool}
+
+prepend-path PATH /tools/bpftool-7.3.0/sbin

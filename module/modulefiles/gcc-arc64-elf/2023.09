@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {GCC toolchain for ARCv3 targets}
+    puts stderr {}
+}
+
+module-whatis {GCC toolchain for ARCv3 targets}
+
+prepend-path PATH /tools/gcc-arc64-elf-2023.09/bin

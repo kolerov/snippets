@@ -1,0 +1,12 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {QEMU for ARC targets (UP version)}
+    puts stderr {}
+}
+
+module-whatis {QEMU for ARC targets (UP version)}
+
+set home /tools/qemu-arc
+setenv QEMU_HOME $home
+prepend-path PATH $home/bin

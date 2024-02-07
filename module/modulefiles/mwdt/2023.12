@@ -1,0 +1,14 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {MetaWare Development Toolkit}
+    puts stderr {}
+}
+
+module-whatis {MetaWare Development Toolkit}
+
+set home /tools/mwdt-2023.12
+setenv METAWARE_ROOT $home/MetaWare
+setenv NSIM_HOME $home/nSIM/nSIM_64
+prepend-path PATH $home/nSIM/nSIM_64/bin:$home/MetaWare/arc/bin:$home/MetaWare/ide
+prepend-path LD_LIBRARY_PATH $home/nSIM/nSIM_64/lib:$home/MetaWare/arc/bin:$home/license/bin

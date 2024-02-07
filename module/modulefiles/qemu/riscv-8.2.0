@@ -1,0 +1,12 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {QEMU for RISC-V targets}
+    puts stderr {}
+}
+
+module-whatis {QEMU for RISC-V targets}
+
+set home /tools/qemu-riscv-8.2.0
+setenv QEMU_HOME $home
+prepend-path PATH $home/bin

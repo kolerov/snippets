@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {autoconf tool}
+    puts stderr {}
+}
+
+module-whatis {autoconf tool}
+
+prepend-path PATH /tools/autoconf-2.71/bin

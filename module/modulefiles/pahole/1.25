@@ -1,0 +1,13 @@
+#%Module
+
+prereq elfutils/0.189
+
+proc ModulesHelp {} {
+    puts stderr {pahole tool}
+    puts stderr {}
+}
+
+module-whatis {pahole tool}
+
+prepend-path PATH /tools/pahole-1.25/bin
+prepend-path LD_LIBRARY_PATH /tools/pahole-1.25/lib

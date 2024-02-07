@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {OpenOCD 0.12 - Artemiy's version}
+    puts stderr {}
+}
+
+module-whatis {OpenOCD 0.12 - Artemiy's version}
+
+prepend-path PATH /tools/openocd-arc-artemiy/bin

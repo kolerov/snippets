@@ -1,0 +1,2 @@
+#%Module
+module-version gcc-riscv64-elf/2023.12.20-medlow default

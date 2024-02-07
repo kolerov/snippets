@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {OpenOCD 0.9 - arc-2021.09 release}
+    puts stderr {}
+}
+
+module-whatis {OpenOCD 0.9 - arc-2021.09 release}
+
+prepend-path PATH /tools/openocd-arc-2021.09/bin

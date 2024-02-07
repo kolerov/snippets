@@ -1,0 +1,10 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {GCC toolchain for RISC-V baremetal targets}
+    puts stderr {}
+}
+
+module-whatis {GCC toolchain for RISC-V baremetal targets}
+
+prepend-path PATH /tools/gcc-riscv64-elf-2023.12.20-medlow/bin

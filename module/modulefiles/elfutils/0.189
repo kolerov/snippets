@@ -1,0 +1,13 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {Define these variables for GCC:}
+    puts stderr {    export C_INCLUDE_PATH="/tools/elfutils-0.189/include"}
+    puts stderr {    export LIBRARY_PATH="/tools/elfutils-0.189/lib"}
+    puts stderr {}
+}
+
+module-whatis {elfutils libraries and tools}
+
+prepend-path PATH /tools/elfutils-0.189/bin
+prepend-path LD_LIBRARY_PATH /tools/elfutils-0.189/lib

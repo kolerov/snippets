@@ -1,0 +1,11 @@
+#%Module
+
+proc ModulesHelp {} {
+    puts stderr {Spike RISC-V simulator}
+    puts stderr {}
+}
+
+module-whatis {Spike RISC-V simulator}
+
+prepend-path PATH /tools/spike/bin
+prepend-path LD_LIBRARY_PATH /tools/spike/lib
