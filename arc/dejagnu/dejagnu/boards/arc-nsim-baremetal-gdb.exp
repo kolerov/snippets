@@ -1,0 +1,164 @@
+set_board_info target_install $target_triplet
+load_generic_config "gdb-comm"
+
+# GDB tests require special treatment, they ignore "gdb-comm" configuration
+# unless "monitor" GDB test suite configuration is loaded.
+if { $tool == "gdb" } {
+    load_lib "../config/monitor.exp"
+}
+
+process_multilib_options "$env(ARC_MULTILIB_OPTIONS)"
+
+search_and_load_file "library file" "arc-common.exp" ${boards_dir}
+search_and_load_file "library file" "arc-nsim-common.exp" ${boards_dir}
+
+lappend nsim_flags -gdb -reconnect
+set_board_info nsim_bin $nsim_bin
+set_board_info nsim_flags $nsim_flags
+
+# Close the connection to nsim_gdb, which should then die.
+proc nsim_gdb_close {} {
+    global board_info board
+    global errorInfo
+
+    verbose -log "nsim_gdb_close: Trying to close nSIM"
+
+    # Close nSIM if it is running
+    if [board_info $board exists nsim_id] {
+	set nsim_id [board_info $board nsim_id]
+
+	if [catch {close -i $nsim_id}] {
+	    verbose -log "nsim_gdb_close: failed to close $nsim_id: $errorInfo"
+	}
+
+	if [catch {wait -i $nsim_id}] {
+	    verbose -log "nsim_gdb_close: failed to wait for $nsim_id: $errorInfo"
+	}
+
+	unset_board_info nsim_id
+    }
+}
+
+# Open a connection to nsim_gdb on a given port. Kills off any pre-existing
+# nSIM. Sets the netport for the board to the supplied value.
+#
+# @param[in] portnum The port number to use
+proc nsim_gdb_open { portnum } {
+    global board_info board env
+
+    verbose -log "nsim_gdb_open: Trying to start nSIM with port=$portnum"
+    
+    # Close any existing nSIM, then spawn a new one, saving its spawn_id and
+    # portnum and setting the netport.
+    nsim_gdb_close
+    
+    spawn sh -c "[board_info $board nsim_bin] -port $portnum [board_info $board nsim_flags] >> nsim.log 2>&1"
+
+    unset_board_info nsim_id
+    set_board_info nsim_id $spawn_id
+    unset_board_info nsim_port
+    set_board_info nsim_port $portnum
+    unset_board_info netport
+    set_board_info netport ":$portnum"
+}
+
+# Reboot nSIM.
+#
+# Close nSIM and reopen with one larger port number. Naming of this proc is
+# dictated by the debug infrastructure.
+#
+# This can be called very early on, before the board has been set up. We cheat
+# and set it up if it doesn't exist.
+#
+# @param[in] connhost  The connected host (always arc-nsim here)
+# @param[in] args      Any remaining args (unused here)
+proc arc-nsim-baremetal-gdb_reboot { connhost args } {
+    global board_info board env
+    verbose -log "arc_nsim_gdb_reboot $connhost $args"
+
+    # Do we have board?
+    if {! [info exists board]} {
+	set board $connhost
+    }
+
+    # GDB testsuite has an unfortunate trait - it reboots target after
+    # recording TCP port involved. As a result if we would try to generate new
+    # port number after reboot, test would fail, as it would use old TCP port
+    # number.
+    nsim_gdb_open [board_info $board nsim_port]
+
+    return 1
+}
+
+# Standard gdb_comm_leave will simply disconnect from target and will reuse
+# same GDB for next test. Restart GDB completely for sure.
+proc gdb_comm_leave { } {
+    global gdb_prompt
+    quit_gdb
+}
+
+set extra_cflags "-specs=$env(ARC_SPECS_FILE)"
+set extra_ldflags "-Wl,--defsym=__DEFAULT_HEAP_SIZE=256m -Wl,--defsym=__DEFAULT_STACK_SIZE=1024m"
+
+# -fomit-frame-pointer:
+#     GCC generates improper DWARF info when frame-pointer is involved - all
+#     variables in debug information are specified relatively to FP register
+#     instead of a virtual frame base, hence this information is invalid in
+#     prologue and epilogue. Since GDB doesn't epilogue (at least as of now),
+#     some watchpoint tests fail, because they get an extra watchpoint value
+#     change even though it is not a variable that has changed, by a FP
+#     register in epilogue.
+if { $tool == "gdb" } {
+    lappend extra_cflags -fomit-frame-pointer
+}
+
+# We only support newlib on this target. We assume that all multilib
+# options have been specified before we get here.
+set_board_info compiler  "[find_gcc]"
+set_board_info cflags    "[libgloss_include_flags] [newlib_include_flags] $extra_cflags"
+set_board_info ldflags   "[libgloss_link_flags] $extra_ldflags [newlib_link_flags]"
+
+# get-random-port.py verifies that generated port is free. nsim_open will set
+# the netport (used by gdb-comm) as well as setting up nSIM specific data.
+nsim_gdb_open [exec [file dirname $env(DEJAGNU)]/scripts/get-random-port.py]
+
+# Details about used options:
+#
+#     is_simulator 1 - Tests may recognize this board as a simulator and reduce
+#         amount of computations.
+#
+#     max_reload_reboots 1500000 - Sometimes GDB cannot connect to nSIM and
+#         reboots it. By default amount of reboots is limited to 15, after that
+#         all execution tests will be reported as UNTESTED. Increase it.
+#
+#     noargs,1, gdb,nosignals 1, etc. - Arguments or signals are not passed,
+#         cannot return results, and doesn't do inferiorio.
+#
+#     use_gdb_stub 1 - We use gdbserver to run applications
+#
+#     gdb,start_symbol "__start" - GDB jumps to start_symbols after loading.
+#         Default value is `start'.
+#
+#     gdb,noargs 1 - This duplicates the one without 'gdb,'
+
+set_board_info is_simulator 1
+set_board_info gdb_protocol "remote"
+set_board_info gdb_run_command "continue"
+set_board_info sim_time_limit 300
+set_board_info max_reload_reboots 1500000
+set_board_info noargs 1
+set_board_info gdb,nosignals 1
+set_board_info gdb,noresults 1
+set_board_info gdb,noinferiorio 1
+set_board_info needs_status_wrapper ""
+
+if { $tool == "gdb" } {
+    set_board_info use_gdb_stub 1
+    set_board_info gdb,start_symbol "__start"
+    set_board_info gdb,do_reload_on_run 1
+    set_board_info gdb,no_hardware_watchpoints 1
+    set_board_info gdb,noargs 1
+    set_board_info gdb,nofileio 1
+}
+
+# vim: noexpandtab sts=4 ts=8:

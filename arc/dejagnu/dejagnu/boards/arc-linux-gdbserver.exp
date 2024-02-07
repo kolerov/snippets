@@ -1,0 +1,42 @@
+set_board_info target_install ${target_triplet}
+
+# Load the generic configuration for this board. This will define a basic set
+# of routines needed by the tool to communicate with the board. Depends on the
+# tool.
+if { $tool == "gdb" } {
+	load_generic_config "gdbserver"
+} else {
+	load_generic_config "unix"
+}
+
+process_multilib_options ""
+set_board_info compiler [find_gcc]
+
+set_board_info connect        ssh
+set_board_info file_transfer  ssh
+set_board_info slow_simulator 0
+set_board_info ldscript ""
+set_board_info noargs  1
+set_board_info gcc,stack_size 65536
+set_board_info gdb,noinferiorio 1
+set_board_info gdb,noargs  1
+set_board_info gdb,nosignals  1
+set_board_info gdb,noresults 1
+
+if { $tool == "gdb" } {
+    set_board_info protocol ssh
+    set_board_info gdb_protocol "remote"
+    set_board_info gdb,do_reload_on_run 1
+    set_board_info gdb,no_hardware_watchpoints 1
+    set_board_info gdb_server_prog /usr/bin/gdbserver
+    set_board_info use_gdb_stub 1
+    set_board_info sockethost "$env(ARC_GDBSERVER_HOSTNAME):"
+    set_board_info gdb,socketport "$env(ARC_GDBSERVER_PORT)"
+    set board_info([get_local_hostname],gdb_opts) "-ex \"set sysroot $env(ARC_SYSROOT_PATH)\""
+}
+
+set_board_info hostname $env(ARC_SSH_HOSTNAME)
+set_board_info username $env(ARC_SSH_USERNAME)
+set_board_info port $env(ARC_SSH_PORT)
+set_board_info scp_prog $env(ARC_SCP_PROG)
+set_board_info ssh_prog $env(ARC_SSH_PROG)

@@ -1,0 +1,33 @@
+set_board_info target_install ${target_triplet}
+load_generic_config "sim"
+load_base_board_description "basic-sim"
+
+process_multilib_options "$env(ARC_MULTILIB_OPTIONS)"
+
+search_and_load_file "library file" "arc-common.exp" ${boards_dir}
+search_and_load_file "library file" "arc-qemu-common.exp" ${boards_dir}
+
+set extra_cflags "-specs=$env(ARC_SPECS_FILE)"
+set extra_ldflags "-Wl,--defsym=__DEFAULT_HEAP_SIZE=256m -Wl,--defsym=__DEFAULT_STACK_SIZE=32m"
+
+set_board_info sim "$qemu_bin [join $qemu_flags]"
+set_board_info is_simulator 1
+set_board_info compiler  "[find_gcc]"
+set_board_info cflags    "[libgloss_include_flags] [newlib_include_flags] ${extra_cflags}"
+set_board_info ldflags   "[libgloss_link_flags] ${extra_ldflags} [newlib_link_flags]"
+
+if { $tool == "libstdc++" } {
+    set_board_info sim_time_limit 1200
+} else {
+    set_board_info sim_time_limit 300
+}
+
+# The simulator returns exit statuses
+set_board_info needs_status_wrapper 1
+
+# Doesn't pass arguments or signals, can't return results, and doesn't
+# do inferiorio.
+set_board_info noargs 1
+set_board_info gdb,nosignals 1
+set_board_info gdb,noresults 1
+set_board_info gdb,noinferiorio 1

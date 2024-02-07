@@ -1,0 +1,68 @@
+proc arc_dump_gcc_defines { } {
+    global board board_info
+    
+    if {[info exists board]} {
+	set target_board $board
+    } else {
+	set target_board [target_info name]
+    }
+
+    if { [board_info $target_board exists compiler] } {
+	set compiler [board_info $target_board compiler]
+    } else {
+	set compiler [find_gcc]
+    }
+
+    if { $compiler == "" } {
+	return 0
+    }
+
+    regexp "/.* " $compiler compiler
+    set compiler [string trimright $compiler " "]
+
+    if { [which $compiler] == 0 } {
+	return 0
+    }
+
+    if { [board_info $target_board exists multilib_flags] } {
+	set opts [board_info $target_board multilib_flags]
+    } else {
+	set opts ""
+    }
+
+    return [eval exec $compiler $opts -dM -E - < /dev/null]
+}
+
+proc arc_target_is_hs6x { } {
+    return [regexp "__ARC64_ARCH64__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_hs5x { } {
+    return [regexp "__ARC64_ARCH32__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_hs4x { } {
+    return [regexp "__ARCHS__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_em { } {
+    return [regexp "__ARCEM__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_arc700 { } {
+    return [regexp "__ARC700__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_arc60X { } {
+    return [regexp "__ARC60\[01\]__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_arc600 { } {
+    return [regexp "__ARC600__" [arc_dump_gcc_defines]]
+}
+
+proc arc_target_is_arc601 { } {
+    return [regexp "__ARC601__" [arc_dump_gcc_defines]]
+}
+
+# vim: noexpandtab sts=4 ts=8:

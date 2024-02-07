@@ -1,0 +1,22 @@
+set qemu_flags {}
+set qemu_bin "$env(QEMU_HOME)/bin/qemu-system-arc"
+
+if { [arc_target_is_hs4x] } {
+    lappend qemu_flags -cpu archs
+} elseif { [arc_target_is_em] } {
+    lappend qemu_flags -cpu arcem
+} elseif { [arc_target_is_hs6x] } {
+    lappend qemu_flags -cpu hs6x
+    set qemu_bin "${qemu_bin}64"
+} elseif { [arc_target_is_hs5x] } {
+    lappend qemu_flags -cpu hs5x
+} else {
+    perror "Unknown CPU configuration"
+}
+
+lappend qemu_flags \
+    -semihosting -M arc-sim -m 2G -nographic -no-reboot -monitor none -kernel
+
+if { [string first "nsim.specs" $env(ARC_SPECS_FILE)] == -1 } {
+    perror "QEMU must be used with -specs=nsim.specs to enable semihosting"
+}

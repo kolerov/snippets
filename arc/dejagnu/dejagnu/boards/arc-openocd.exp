@@ -1,0 +1,125 @@
+# Copyright (C) 2024 Synopsys Inc.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# This is a list of toolchains that are supported on this board.
+set_board_info target_install $target_triplet
+
+# Load the generic configuration for this board. This will define a basic set
+# of routines needed by the tool to communicate with the board. Depends on the
+# tool.
+load_generic_config "gdb-comm"
+
+# GDB tests require special treatment, they ignore "gdb-comm" configuration
+# unless "monitor" GDB test suite configuration is loaded.
+if { $tool == "gdb" } {
+	load_lib "../config/monitor.exp"
+}
+
+# Any multilib options are set in an environment variable.
+process_multilib_options "-mcpu=hs38"
+
+set extra_cflags "-fomit-frame-pointer"
+set extra_ldflags "-specs=hsdk.specs -Wl,--no-warn-rwx-segments"
+
+# We only support newlib on this target. We assume that all multilib
+# options have been specified before we get here.
+set_board_info compiler  "[find_gcc]"
+set_board_info cflags    "[libgloss_include_flags] [newlib_include_flags] ${extra_cflags}"
+set_board_info ldflags   "[libgloss_link_flags] ${extra_ldflags} [newlib_link_flags]"
+set_board_info ldscript  ""
+
+set_board_info gdb_protocol "remote"
+set_board_info gdb_run_command "continue"
+set_board_info noargs 1
+set_board_info gdb,nosignals 1
+set_board_info gdb,noresults 1
+set_board_info gdb,noinferiorio 1
+set_board_info needs_status_wrapper ""
+set_board_info gdb_init_command "set arch ARCv2"
+
+if { $tool == "gdb" } {
+	set_board_info use_gdb_stub 1
+	set_board_info gdb,start_symbol "__start"
+	set_board_info gdb,do_reload_on_run 1
+	# Hardware watchpoint are not precies on ARC - they may fire few
+	# instructions after ST instruction and this may skew testing when
+	# there is several ST to same address consequently, as first stores may
+	# get missed. Unfortunately it seems that GDB testsuite configuration
+	# doesn't distinguish between hardware watchpoints and breakpoint, the
+	# latter ones should work fine on ARC.
+	set_board_info gdb,no_hardware_watchpoints 1
+	set_board_info gdb,noargs 1
+	set_board_info gdb,nofileio 1
+}
+
+proc arc_openocd_close {} {
+    global board_info board errorInfo
+
+    verbose -log "openocd: trying to close"
+
+    if [board_info $board exists openocd_id] {
+	set openocd_id [board_info $board openocd_id]
+
+	if [catch {close -i $openocd_id}] {
+	    verbose -log "openocd: failed to close $openocd_id: $errorInfo"
+	}
+
+	if [catch {wait -i $openocd_id}] {
+	    verbose -log "openocd: failed to wait for $openocd_id: $errorInfo"
+	}
+
+	unset_board_info openocd_id
+    }
+}
+
+proc arc_openocd_open {} {
+    global board_info board env
+
+    arc_openocd_close
+
+    verbose -log "openocd: trying to open"
+    spawn sh -c "$env(OPENOCD_HOME)/bin/openocd -s $env(OPENOCD_HOME)/share/openocd/scripts -f board/snps_hsdk_4xd.cfg -d0 >> openocd.log 2>&1"
+    unset_board_info openocd_id
+    set_board_info openocd_id $spawn_id
+    unset_board_info netport
+    set_board_info netport ":3336"
+    verbose -log "openocd: opened with id=${spawn_id}"
+}
+
+proc arc-openocd_reboot { host args } {
+    global board_info board env
+
+    verbose -log "openocd: trying to reboot host=`$host"
+
+    if {! [info exists board]} {
+	set board $host
+    }
+
+    arc_openocd_open
+
+    return 1
+}
+
+# Standard gdb_comm_leave will simply disconnect from target and will reuse
+# same GDB for next test. Restart GDB completely for sure.
+proc gdb_comm_leave { } {
+    global gdb_prompt
+    verbose -log "openocd: close GDB"
+    quit_gdb
+}
+
+arc_openocd_open
+
+# vim: noexpandtab sts=4 ts=8:
