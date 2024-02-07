@@ -1,0 +1,24 @@
+# Use these for ARCv2:
+#
+#     set target_alias    "arc-elf32"
+#     set target_triplet  "arc-unknown-elf32"
+#
+# Use these for ARCv3:
+#
+#     set target_alias    "arc64-elf"
+#     set target_triplet  "arc64-unknown-elf"
+
+set target_alias    "arc-elf32"
+set target_triplet  "arc-unknown-elf32"
+set tmpdir          "tmp"
+
+# For Newlib
+set tool_version    "4.3.0"
+
+switch $tool {
+    gdb {
+	source $srcdir/lib/append_gdb_boards_dir.exp
+    }
+}
+
+set verbose 0

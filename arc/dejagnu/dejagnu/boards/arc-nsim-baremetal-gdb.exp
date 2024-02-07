@@ -15,6 +15,8 @@ search_and_load_file "library file" "arc-nsim-common.exp" ${boards_dir}
 lappend nsim_flags -gdb -reconnect
 set_board_info nsim_bin $nsim_bin
 set_board_info nsim_flags $nsim_flags
+# set_board_info nsim_port [exec [file dirname $env(DEJAGNU)]/scripts/get-random-port.py]
+set_board_info nsim_port $env(ARC_GDBSERVER_PORT)
 
 # Close the connection to nsim_gdb, which should then die.
 proc nsim_gdb_close {} {
@@ -118,9 +120,7 @@ set_board_info compiler  "[find_gcc]"
 set_board_info cflags    "[libgloss_include_flags] [newlib_include_flags] $extra_cflags"
 set_board_info ldflags   "[libgloss_link_flags] $extra_ldflags [newlib_link_flags]"
 
-# get-random-port.py verifies that generated port is free. nsim_open will set
-# the netport (used by gdb-comm) as well as setting up nSIM specific data.
-nsim_gdb_open [exec [file dirname $env(DEJAGNU)]/scripts/get-random-port.py]
+nsim_gdb_open [board_info $board nsim_port]
 
 # Details about used options:
 #
