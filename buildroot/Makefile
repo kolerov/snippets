@@ -53,70 +53,122 @@ update-buildroot: update-buildroot-upstream update-buildroot-synopsys
 # QEMU HS4x
 #
 
-run-qemu-hs4x:
+.PHONY: \
+	run-qemu-hs4x-gnu \
+	run-qemu-hs4x-uclibc \
+	configure-qemu-hs4x-gnu \
+	configure-qemu-hs4x-uclibc \
+	build-qemu-hs4x-gnu \
+	build-qemu-hs4x-uclibc
+
+run-qemu-hs4x-gnu:
 	qemu-system-arc $(QEMU_COMMON_ARGS) \
 	    -M virt -cpu archs -m 2G -kernel build-qemu-hs4x-gnu/images/vmlinux
 
-configure-qemu-hs4x:
+run-qemu-hs4x-uclibc:
+	qemu-system-arc $(QEMU_COMMON_ARGS) \
+	    -M virt -cpu archs -m 2G -kernel build-qemu-hs4x-uclibc/images/vmlinux
+
+configure-qemu-hs4x-gnu:
 	rm -rf build-qemu-hs4x-gnu
 	mkdir -p build-qemu-hs4x-gnu
-	make -C buildroot O=$(abspath build-qemu-hs4x-gnu) defconfig DEFCONFIG=../defconfigs/qemu_hs4x_defconfig
+	make -C buildroot O=$(abspath build-qemu-hs4x-gnu) defconfig DEFCONFIG=../defconfigs/qemu_hs4x_gnu_defconfig
 
-build-qemu-hs4x:
+configure-qemu-hs4x-uclibc:
+	rm -rf build-qemu-hs4x-uclibc
+	mkdir -p build-qemu-hs4x-uclibc
+	make -C buildroot O=$(abspath build-qemu-hs4x-uclibc) defconfig DEFCONFIG=../defconfigs/qemu_hs4x_uclibc_defconfig
+
+build-qemu-hs4x-gnu:
 	make -C build-qemu-hs4x-gnu -j $(NPROC)
+
+build-qemu-hs4x-uclibc:
+	make -C build-qemu-hs4x-uclibc -j $(NPROC)
 
 #
 # QEMU HS5x
 #
 
-QEMU_HS5X_BUILD_DIR := build-qemu-hs5x-uclibc
+QEMU_HS5X_UCLIBC_BUILD_DIR := build-qemu-hs5x-uclibc
 
-run-qemu-hs5x:
+.PHONY: \
+	run-qemu-hs5x-uclibc \
+	configure-qemu-hs5x-uclibc \
+	build-qemu-hs5x-uclibc
+
+run-qemu-hs5x-uclibc:
 	qemu-system-arc $(QEMU_COMMON_ARGS) \
-	    -M virt,ram_start=0 -cpu hs5x -m 2G -kernel $(QEMU_HS5X_BUILD_DIR)/images/loader
+	    -M virt,ram_start=0 -cpu hs5x -m 2G -kernel $(QEMU_HS5X_UCLIBC_BUILD_DIR)/images/loader
 
-configure-qemu-hs5x:
-	rm -rf $(QEMU_HS5X_BUILD_DIR)
-	mkdir -p $(QEMU_HS5X_BUILD_DIR)
-	make -C buildroot-synopsys O=$(abspath $(QEMU_HS5X_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/qemu_hs5x_defconfig
+configure-qemu-hs5x-uclibc:
+	rm -rf $(QEMU_HS5X_UCLIBC_BUILD_DIR)
+	mkdir -p $(QEMU_HS5X_UCLIBC_BUILD_DIR)
+	make -C buildroot-synopsys O=$(abspath $(QEMU_HS5X_UCLIBC_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/qemu_hs5x_uclibc_defconfig
 
-build-qemu-hs5x:
-	make -C build-qemu-hs5x-uclibc -j $(NPROC)
+build-qemu-hs5x-uclibc:
+	make -C $(QEMU_HS5X_UCLIBC_BUILD_DIR) -j $(NPROC)
 
 #
 # QEMU HS6x
 #
 
-QEMU_HS6X_BUILD_DIR := build-qemu-hs6x-gnu
+QEMU_HS6X_GNU_BUILD_DIR := build-qemu-hs6x-gnu
 
-run-qemu-hs6x:
+.PHONY:
+	run-qemu-hs6x-gnu \
+	configure-qemu-hs6x-gnu \
+	build-qemu-hs6x-gnu
+
+run-qemu-hs6x-gnu:
 	qemu-system-arc64 $(QEMU_COMMON_ARGS) \
-	    -M virt,ram_start=0 -cpu hs6x -m 2G -kernel $(QEMU_HS6X_BUILD_DIR)/images/loader
+	    -M virt,ram_start=0 -cpu hs6x -m 2G -kernel $(QEMU_HS6X_GNU_BUILD_DIR)/images/loader
 
-configure-qemu-hs6x:
-	rm -rf $(QEMU_HS6X_BUILD_DIR)
-	mkdir -p $(QEMU_HS6X_BUILD_DIR)
-	make -C buildroot-synopsys O=$(abspath $(QEMU_HS6X_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/qemu_hs6x_defconfig
+configure-qemu-hs6x-gnu:
+	rm -rf $(QEMU_HS6X_GNU_BUILD_DIR)
+	mkdir -p $(QEMU_HS6X_GNU_BUILD_DIR)
+	make -C buildroot-synopsys O=$(abspath $(QEMU_HS6X_GNU_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/qemu_hs6x_gnu_defconfig
 
-build-qemu-hs6x:
-	make -C build-qemu-hs6x-gnu -j $(NPROC)
+build-qemu-hs6x-gnu:
+	make -C $(QEMU_HS6X_GNU_BUILD_DIR) -j $(NPROC)
+
+#
+# HS Development Kit
+#
+
+HSDK_HS4X_GNU_BUILD_DIR := build-hsdk-hs4x-gnu
+
+.PHONY: \
+	configure-hsdk-hs4x-gnu \
+	build-hsdk-hs4x-gnu
+
+configure-hsdk-hs4x-gnu:
+	rm -rf $(HSDK_HS4X_GNU_BUILD_DIR)
+	mkdir -p $(HSDK_HS4X_GNU_BUILD_DIR)
+	make -C buildroot O=$(abspath $(HSDK_HS4X_GNU_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/hsdk_hs4x_gnu_defconfig
+
+build-hsdk-hs4x-gnu:
+	make -C $(HSDK_HS4X_GNU_BUILD_DIR) -j 1
 
 #
 # Setup
 #
 
-setup-gdb-hs4x:
+setup-gdb-hs4x-uclibc:
+	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc-linux-uclibc-native/* root@$(REMOTE_HOST):/
+
+setup-gdb-hs4x-gnu:
 	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc-linux-gnu-native/* root@$(REMOTE_HOST):/
 
-setup-gdb-hs5x:
+setup-gdb-hs5x-uclibc:
 	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc32-linux-uclibc-native/* root@$(REMOTE_HOST):/
 
-setup-gdb-hs6x:
+setup-gdb-hs6x-gnu:
 	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) /tools/gdb-arc64-linux-gnu-native/* root@$(REMOTE_HOST):/
 
 setup-bugs:
 	rsync --port=$(REMOTE_PORT) $(RSYNC_ARGS) $(BUGS_DIR)/* root@$(REMOTE_HOST):/root/
 
-setup-hs4x: setup-gdb-hs4x setup-bugs
-setup-hs5x: setup-gdb-hs5x setup-bugs
-setup-hs6x: setup-gdb-hs6x setup-bugs
+setup-hs4x-uclibc: setup-gdb-hs4x-uclibc setup-bugs
+setup-hs4x-gnu: setup-gdb-hs4x-gnu setup-bugs
+setup-hs5x-uclibc: setup-gdb-hs5x-uclibc setup-bugs
+setup-hs6x-gnu: setup-gdb-hs6x-gnu setup-bugs
