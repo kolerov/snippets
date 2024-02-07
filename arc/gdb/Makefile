@@ -11,6 +11,12 @@ CXXFLAGS	:= $(CFLAGS)
 # GCC configurations
 #
 
+GDB_ARCV2_NEWLIB_BUILD_DIR 		:= build-gdb-arcv2-newlib
+GDB_ARCV2_NEWLIB_PREFIX 		:= /tools/gdb-arc-elf32-newlib
+
+GDB_ARCV3_NEWLIB_BUILD_DIR 		:= build-gdb-arcv3-newlib
+GDB_ARCV3_NEWLIB_PREFIX 		:= /tools/gdb-arc64-elf-newlib
+
 TOOLCHAIN_HS4X_UCLIBC_SYSROOT_PATH	:= $(shell arc-linux-uclibc-gcc -print-sysroot)
 GDB_HS4X_UCLIBC_HOST_BUILD_DIR 		:= build-gdb-hs4x-uclibc-host
 GDB_HS4X_UCLIBC_HOST_PREFIX 		:= /tools/gdb-arc-linux-uclibc-host
@@ -64,6 +70,82 @@ COMMON_GDBSERVER_CONFIGURES := \
 	--prefix=/usr \
 	--disable-werror \
 	--disable-gdb
+
+#
+# ARCv2 Newlib
+#
+
+.PHONY: \
+	configure-gdb-arcv2-newlib \
+	build-gdb-arcv2-newlib \
+	install-gdb-arcv2-newlib \
+	clean-gdb-arcv2-newlib
+
+configure-gdb-arcv2-newlib:
+	rm -rf $(GDB_ARCV2_NEWLIB_BUILD_DIR)
+	mkdir -p $(GDB_ARCV2_NEWLIB_BUILD_DIR)
+	cd $(GDB_ARCV2_NEWLIB_BUILD_DIR) && \
+	../binutils-gdb/configure \
+		--target=arc-elf32 \
+		--prefix=$(GDB_ARCV2_NEWLIB_PREFIX) \
+		--enable-multilib \
+		--disable-werror \
+		--disable-python \
+		--enable-gdb \
+		--disable-gas \
+		--disable-binutils \
+		--disable-ld \
+		--disable-gold \
+		--disable-gprof \
+		CFLAGS="$(DEBUG_FLAGS)" \
+		CXXFLAGS="$(DEBUG_FLAGS)"
+
+build-gdb-arcv2-newlib:
+	make -C $(GDB_ARCV2_NEWLIB_BUILD_DIR) -j $(NPROC)
+
+install-gdb-arcv2-newlib:
+	make -C $(GDB_ARCV2_NEWLIB_BUILD_DIR) install
+
+clean-gdb-arcv2-newlib:
+	rm -rf $(GDB_ARCV2_NEWLIB_BUILD_DIR)
+
+#
+# ARCv3 Newlib
+#
+
+.PHONY: \
+	configure-gdb-arcv3-newlib \
+	build-gdb-arcv3-newlib \
+	install-gdb-arcv3-newlib \
+	clean-gdb-arcv3-newlib
+
+configure-gdb-arcv3-newlib:
+	rm -rf $(GDB_ARCV3_NEWLIB_BUILD_DIR)
+	mkdir -p $(GDB_ARCV3_NEWLIB_BUILD_DIR)
+	cd $(GDB_ARCV3_NEWLIB_BUILD_DIR) && \
+	../binutils-gdb/configure \
+		--target=arc64-elf \
+		--prefix=$(GDB_ARCV3_NEWLIB_PREFIX) \
+		--enable-multilib \
+		--disable-werror \
+		--disable-python \
+		--enable-gdb \
+		--disable-gas \
+		--disable-binutils \
+		--disable-ld \
+		--disable-gold \
+		--disable-gprof \
+		CFLAGS="$(DEBUG_FLAGS)" \
+		CXXFLAGS="$(DEBUG_FLAGS)"
+
+build-gdb-arcv3-newlib:
+	make -C $(GDB_ARCV3_NEWLIB_BUILD_DIR) -j $(NPROC)
+
+install-gdb-arcv3-newlib:
+	make -C $(GDB_ARCV3_NEWLIB_BUILD_DIR) install
+
+clean-gdb-arcv3-newlib:
+	rm -rf $(GDB_ARCV3_NEWLIB_BUILD_DIR)
 
 #
 # HS4x uClibc - for host

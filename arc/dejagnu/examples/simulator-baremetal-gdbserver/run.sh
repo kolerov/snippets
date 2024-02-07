@@ -25,6 +25,8 @@ fi
 
 export PATH="/tools/gcc-arc-elf-2023.09/bin:$PATH"
 export PATH="/tools/gcc-arc64-elf-2023.09/bin:$PATH"
+export PATH="/tools/gdb-arc-elf32-newlib/bin:$PATH"
+export PATH="/tools/gdb-arc64-elf-newlib/bin:$PATH"
 export DEJAGNU="`realpath ../../dejagnu/site.exp`"
 
 export ARC_MULTILIB_OPTIONS="-mcpu=archs"
