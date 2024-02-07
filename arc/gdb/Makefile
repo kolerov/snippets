@@ -32,13 +32,13 @@ GDB_HS5X_UCLIBC_NATIVE_PREFIX 		:= /tools/gdb-arc32-linux-uclibc-native
 GMP_HS5X_UCLIBC_SYSROOT 		:= /tools/gmp-arc32-linux-uclibc
 MPFR_HS5X_UCLIBC_SYSROOT 		:= /tools/mpfr-arc32-linux-uclibc
 
-TOOLCHAIN_HS6X_GNU_SYSROOT_PATH := $(shell arc64-linux-gnu-gcc -print-sysroot)
-GDB_HS6X_GNU_HOST_BUILD_DIR 	:= build-gdb-hs6x-gnu-host
-GDB_HS6X_GNU_HOST_PREFIX 	:= /tools/gdb-arc64-linux-gnu-host
-GDB_HS6X_GNU_NATIVE_BUILD_DIR 	:= build-gdb-hs6x-gnu-native
-GDB_HS6X_GNU_NATIVE_PREFIX 	:= /tools/gdb-arc64-linux-gnu-native
-GMP_HS6X_GNU_SYSROOT 		:= /tools/gmp-arc64-linux-gnu
-MPFR_HS6X_GNU_SYSROOT 		:= /tools/mpfr-arc64-linux-gnu
+TOOLCHAIN_HS6X_GNU_SYSROOT_PATH 	:= $(shell arc64-linux-gnu-gcc -print-sysroot)
+GDB_HS6X_GNU_HOST_BUILD_DIR 		:= build-gdb-hs6x-gnu-host
+GDB_HS6X_GNU_HOST_PREFIX 		:= /tools/gdb-arc64-linux-gnu-host
+GDB_HS6X_GNU_NATIVE_BUILD_DIR 		:= build-gdb-hs6x-gnu-native
+GDB_HS6X_GNU_NATIVE_PREFIX 		:= /tools/gdb-arc64-linux-gnu-native
+GMP_HS6X_GNU_SYSROOT 			:= /tools/gmp-arc64-linux-gnu
+MPFR_HS6X_GNU_SYSROOT 			:= /tools/mpfr-arc64-linux-gnu
 
 COMMON_HOST_GDB_CONFIGURES := \
 	--disable-multilib \
