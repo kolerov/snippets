@@ -5,3 +5,5 @@ arc/dejagnu/**/tmp
 arc/dejagnu/**/obj
 arc/dejagnu/examples/*/*.o
 arc/dejagnu/examples/*/*.log
+arc/buildroot/build-*
+arc/buildroot/buildroot*
