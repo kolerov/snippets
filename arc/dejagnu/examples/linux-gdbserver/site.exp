@@ -1,0 +1,12 @@
+set tmpdir "tmp"
+
+set target_alias "$env(ARC_TARGET_ALIAS)"
+set target_triplet "$env(ARC_TARGET_TRIPLET)"
+
+switch $tool {
+    gdb {
+	source $srcdir/lib/append_gdb_boards_dir.exp
+    }
+}
+
+set verbose 0
