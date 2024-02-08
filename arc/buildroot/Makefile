@@ -114,7 +114,7 @@ build-qemu-hs5x-uclibc:
 
 QEMU_HS6X_GNU_BUILD_DIR := build-qemu-hs6x-gnu
 
-.PHONY:
+.PHONY: \
 	run-qemu-hs6x-gnu \
 	configure-qemu-hs6x-gnu \
 	build-qemu-hs6x-gnu
