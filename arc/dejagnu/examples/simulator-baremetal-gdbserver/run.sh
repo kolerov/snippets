@@ -24,20 +24,25 @@ else
         exit 1
 fi
 
-# Export GCC cross-compilers
-export PATH="/tools/gcc-arc-elf-2023.09/bin:$PATH"
-export PATH="/tools/gcc-arc64-elf-2023.09/bin:$PATH"
+if [[ $target == "arc-elf32" ]]; then
+        export ARC_TARGET_TRIPLET="arc-unknown-elf32"
+        export ARC_TARGET_ALIAS="arc-elf32"
+        export PATH="/tools/gcc-arc-elf-2023.09/bin:$PATH"
+elif [[ $target == "arc64-elf" ]]; then
+        export ARC_TARGET_TRIPLET="arc64-unknown-elf"
+        export ARC_TARGET_ALIAS="arc64-elf"
+        export PATH="/tools/gcc-arc64-elf-2023.09/bin:$PATH"
+else
+        echo "Error: wrong target: $target"
+        exit 1
+fi
 
 # Export GDB
 if [[ $tool == "gdb" ]]; then
-        if [[ $target == "arc-elf32" ]]; then
-                gdb_home="/tools/gdb-arc-elf32-newlib"
-        else
-                gdb_home="/tools/gdb-arc64-elf-newlib"
-        fi
+        gdb_home="/tools/gdb-$target-newlib"
+        export PATH="${gdb_home}/bin:$PATH"
 fi
 
-export PATH="${gdb_home}/bin:$PATH"
 gdb="${gdb_home}/bin/$target-gdb"
 
 export DEJAGNU="`realpath ../../dejagnu/site.exp`"
