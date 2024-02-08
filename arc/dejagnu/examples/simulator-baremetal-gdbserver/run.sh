@@ -5,9 +5,10 @@
 # srcdir="/repos/newlib/newlib/testsuite"
 # tool="newlib"
 
-srcdir="/repos/workspace/arc/gdb/binutils-gdb/gdb/testsuite"
+srcdir="`realpath ../../../gdb/binutils-gdb/gdb/testsuite`"
 simulator="nsim"
 tool="gdb"
+target="arc-elf32"
 
 if [[ $simulator == "qemu" ]]; then
         board=arc-qemu-baremetal-gdb
@@ -23,12 +24,23 @@ else
         exit 1
 fi
 
+# Export GCC cross-compilers
 export PATH="/tools/gcc-arc-elf-2023.09/bin:$PATH"
 export PATH="/tools/gcc-arc64-elf-2023.09/bin:$PATH"
-export PATH="/tools/gdb-arc-elf32-newlib/bin:$PATH"
-export PATH="/tools/gdb-arc64-elf-newlib/bin:$PATH"
-export DEJAGNU="`realpath ../../dejagnu/site.exp`"
 
+# Export GDB
+if [[ $tool == "gdb" ]]; then
+        if [[ $target == "arc-elf32" ]]; then
+                gdb_home="/tools/gdb-arc-elf32-newlib"
+        else
+                gdb_home="/tools/gdb-arc64-elf-newlib"
+        fi
+fi
+
+export PATH="${gdb_home}/bin:$PATH"
+gdb="${gdb_home}/bin/$target-gdb"
+
+export DEJAGNU="`realpath ../../dejagnu/site.exp`"
 export ARC_MULTILIB_OPTIONS="-mcpu=archs"
 export ARC_SPECS_FILE="nsim.specs"
 export ARC_GDBSERVER_PORT="49105"
@@ -41,4 +53,5 @@ runtest --outdir log \
         --tool $tool \
         --srcdir $srcdir \
         --target_board $board \
+        GDB="$gdb" \
         arc-dbnz.exp
