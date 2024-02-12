@@ -3,6 +3,9 @@ arc/gdb/build-*
 arc/dejagnu/**/log
 arc/dejagnu/**/tmp
 arc/dejagnu/**/obj
+arc/dejagnu/**/cache
+arc/dejagnu/**/outputs
+arc/dejagnu/**/temp
 arc/dejagnu/examples/*/*.o
 arc/dejagnu/examples/*/*.log
 arc/buildroot/build-*
