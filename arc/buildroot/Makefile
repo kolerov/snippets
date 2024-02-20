@@ -149,6 +149,20 @@ configure-hsdk-hs4x-gnu:
 build-hsdk-hs4x-gnu:
 	make -C $(HSDK_HS4X_GNU_BUILD_DIR) -j 1
 
+HSDK_HS4X_GNU_EBPF_BUILD_DIR := build-hsdk-hs4x-gnu-ebpf
+
+.PHONY: \
+	configure-hsdk-hs4x-gnu-ebpf \
+	build-hsdk-hs4x-gnu-ebpf
+
+configure-hsdk-hs4x-gnu-ebpf:
+	rm -rf $(HSDK_HS4X_GNU_EBPF_BUILD_DIR)
+	mkdir -p $(HSDK_HS4X_GNU_EBPF_BUILD_DIR)
+	make -C buildroot O=$(abspath $(HSDK_HS4X_GNU_EBPF_BUILD_DIR)) defconfig DEFCONFIG=../defconfigs/hsdk_hs4x_gnu_ebpf_defconfig
+
+build-hsdk-hs4x-gnu-ebpf:
+	make -C $(HSDK_HS4X_GNU_EBPF_BUILD_DIR) -j 1
+
 #
 # Setup
 #

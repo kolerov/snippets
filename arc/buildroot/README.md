@@ -79,3 +79,10 @@ Now you can connect to the board this way:
 
 1. Serial: `minicom -8 -b 115200 -D /dev/ttyUSB0 -s` (disable hardware flow control)
 2. SSH: `ssh arc-hsdk-root`
+
+## Enabling eBPF JIT
+
+```shell
+mount -t debugfs debugfs /sys/kernel/debug
+sysctl net.core.bpf_jit_enable=1
+```
